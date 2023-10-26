@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpmylgddcilwg"]
+
+[ext_resource type="Script" path="res://src/Main.gd" id="1_3qsph"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3qsph")
+
+[node name="WebsiteFileDialog" type="FileDialog" parent="."]
+mode = 2
+title = "Open website export csv"
+initial_position = 2
+size = Vector2i(640, 360)
+visible = true
+unresizable = true
+borderless = true
+ok_button_text = "Open"
+mode_overrides_title = false
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.csv")
+
+[node name="ScheduleFileDialog" type="FileDialog" parent="."]
+mode = 2
+title = "Open schedule csv"
+initial_position = 2
+size = Vector2i(640, 360)
+unresizable = true
+borderless = true
+ok_button_text = "Open"
+mode_overrides_title = false
+file_mode = 0
+access = 2
+root_subfolder = "D"
+filters = PackedStringArray("*.csv")
+
+[node name="PdfFileDialog" type="FileDialog" parent="."]
+mode = 2
+title = "Select PDF destination folder"
+initial_position = 2
+size = Vector2i(640, 360)
+unresizable = true
+borderless = true
+ok_button_text = "Select Current Folder"
+mode_overrides_title = false
+file_mode = 2
+access = 2
+filters = PackedStringArray("*.csv")
+
+[node name="Progress" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -28.5
+offset_right = 100.0
+offset_bottom = 28.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ProgressLabel" type="Label" parent="Progress"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "1 of 17"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="Progress"]
+layout_mode = 2
+step = 1.0
+
+[connection signal="file_selected" from="WebsiteFileDialog" to="." method="_on_website_file_dialog_file_selected"]
+[connection signal="file_selected" from="ScheduleFileDialog" to="." method="_on_schedule_file_dialog_file_selected"]
+[connection signal="dir_selected" from="PdfFileDialog" to="." method="_on_pdf_file_dialog_dir_selected"]
