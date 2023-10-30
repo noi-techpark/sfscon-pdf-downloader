@@ -3,6 +3,8 @@ extends Control
 @onready var website_data_file_dialog:FileDialog = $WebsiteFileDialog
 @onready var progress_label:Label = $Progress/ProgressLabel
 @onready var progress_bar:ProgressBar = $Progress/ProgressBar
+@onready var http:HTTPRequest = $HTTPRequest
+
 
 # can't be csv, because Godot treats csv files as translations
 const MAPPING_FILE = "res://SFSCON-mapping.txt"
@@ -24,7 +26,6 @@ var pdf_path:String
 
 # stores the csv combined data
 var data:Dictionary = {}
-
 var counter_done:int = 0
 var counter_all:int = 0
 
@@ -52,51 +53,39 @@ func _read_mapping() -> void:
 
 func _on_website_file_dialog_file_selected(path) -> void:
 	# get directory of path for final pdf export location
-	var index:int = path.rfind("/")
-	var base_path:String = path.substr(0, index)
+	var base_path:String = path.substr(0, path.rfind("/"))
 	_prepare_dir(base_path , "/PDF")
 	pdf_path = base_path + "/PDF/"
 	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
-	file.get
-	# skip first line
-	file.get_csv_line()
 	while not file.eof_reached():
 		var line:Array = file.get_csv_line()
-		if line.size() >= WEBSITE_PDF_LINK_INDEX:
+		if line.size() > 1:
 			var pdf_link:String = line[WEBSITE_PDF_LINK_INDEX]
 			var title:String = line[WEBSITE_TITLE_INDEX]
 			var id:String = line[WEBSITE_ID_INDEX]
 			if not data.has(id):
 				print("No match found for: ", title)
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
-				data[id]["pdf"] = pdf_link
+				data[id]["pdf_link"] = pdf_link
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
-				data[id]["time"] = line[WEBSITE_TIME_INDEX]
+				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5)
 				counter_all += 1
-			else:
-				data[id]["pdf"] = "x"
 	progress_bar.max_value = counter_all
-	
 	_download_pdfs()
 
 func _download_pdfs() -> void:
 	var counter = 0
-	for md5 in data.keys():
-		if data[md5].has("pdf") and data[md5]["pdf"].begins_with("https://www.sfscon.it/wp-content/uploads/"):
-			var talk = data[md5]
-			var link = data[md5]["pdf"]
-			
-			var http:HTTPRequest = HTTPRequest.new()
-			add_child(http)
-			http.use_threads = true
-			http.request_completed.connect(_request_completed.bind(talk))
-			var error = http.request(link)
+	for id in data.keys():
+		if data[id].has("pdf_link") and data[id]["pdf_link"].begins_with("https://www.sfscon.it/wp-content/uploads/"):
+			http.request_completed.connect(_request_completed.bind(data[id]))
+			var error = http.request(data[id]["pdf_link"])
 			if error != OK:
 				print(error)
 			counter += 1
+			await http.request_completed
 		else:
-			print("No PDF found for: ", data[md5]["title"])
+			print("No PDF found for: ", data[id]["title"])
 
 func _request_completed(result, response_code, headers, body, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
