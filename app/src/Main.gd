@@ -1,10 +1,10 @@
 extends Control
 
 @onready var website_data_file_dialog:FileDialog = $WebsiteFileDialog
-@onready var progress_label:Label = $Progress/ProgressLabel
-@onready var progress_bar:ProgressBar = $Progress/ProgressBar
+@onready var progress_label:Label = $Result/ProgressLabel
+@onready var progress_bar:ProgressBar = $Result/ProgressBar
 @onready var http:HTTPRequest = $HTTPRequest
-
+@onready var errors:RichTextLabel = $Result/Errors
 
 # can't be csv, because Godot treats csv files as translations
 const MAPPING_FILE = "res://SFSCON-mapping.txt"
@@ -52,10 +52,7 @@ func _read_mapping() -> void:
 			data[id]["track"] = line[MAPPING_TRACK_INDEX]
 
 func _on_website_file_dialog_file_selected(path) -> void:
-	# get directory of path for final pdf export location
-	var base_path:String = path.substr(0, path.rfind("/"))
-	_prepare_dir(base_path , "/PDF")
-	pdf_path = base_path + "/PDF/"
+	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/PDF")
 	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
 	while not file.eof_reached():
@@ -65,7 +62,7 @@ func _on_website_file_dialog_file_selected(path) -> void:
 			var title:String = line[WEBSITE_TITLE_INDEX]
 			var id:String = line[WEBSITE_ID_INDEX]
 			if not data.has(id):
-				print("No match found for: ", title)
+				log_error("No match found for: " + title)
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
@@ -81,15 +78,15 @@ func _download_pdfs() -> void:
 			http.request_completed.connect(_request_completed.bind(data[id]))
 			var error = http.request(data[id]["pdf_link"])
 			if error != OK:
-				print(error)
+				log_error(error)
 			counter += 1
 			await http.request_completed
 		else:
-			print("No PDF found for: ", data[id]["title"])
+			log_error("No PDF found for: " + data[id]["title"])
 
 func _request_completed(result, response_code, headers, body, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
-		print("Talk with no room assigned: ", talk["title"])
+		log_error("Talk with no room assigned: " + talk["title"])
 		counter_done += 1
 		return
 	var dir_name:String = talk["room"] + " - " + talk["track"]
@@ -97,14 +94,17 @@ func _request_completed(result, response_code, headers, body, talk:Dictionary) -
 
 	# 1030 - Simon Dalvai - Developers track
 	var file_name:String = pdf_path + dir_name + "/" + talk["time"] + " - " + talk["name"] + " - " + talk["title"]
-	print("Save PDF of " + talk.title + " to " + file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
 	file.flush()
 	counter_done += 1
 
-func _prepare_dir(base_path:String, path:String) -> void:
+func _prepare_dir(base_path:String, path:String) -> String:
 	var dir = DirAccess.open(base_path)
 	if not dir.dir_exists(base_path + path):
 		dir.make_dir(base_path + path)
 	dir.change_dir(base_path + path)
+	return base_path + path
+
+func log_error(error:String) -> void:
+	errors.append_text(error + "\n")
