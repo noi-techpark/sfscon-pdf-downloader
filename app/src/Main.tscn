@@ -25,33 +25,6 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.csv")
 
-[node name="ScheduleFileDialog" type="FileDialog" parent="."]
-mode = 2
-title = "Open schedule csv"
-initial_position = 2
-size = Vector2i(640, 360)
-unresizable = true
-borderless = true
-ok_button_text = "Open"
-mode_overrides_title = false
-file_mode = 0
-access = 2
-root_subfolder = "D"
-filters = PackedStringArray("*.csv")
-
-[node name="PdfFileDialog" type="FileDialog" parent="."]
-mode = 2
-title = "Select PDF destination folder"
-initial_position = 2
-size = Vector2i(640, 360)
-unresizable = true
-borderless = true
-ok_button_text = "Select Current Folder"
-mode_overrides_title = false
-file_mode = 2
-access = 2
-filters = PackedStringArray("*.csv")
-
 [node name="Progress" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
@@ -77,5 +50,3 @@ layout_mode = 2
 step = 1.0
 
 [connection signal="file_selected" from="WebsiteFileDialog" to="." method="_on_website_file_dialog_file_selected"]
-[connection signal="file_selected" from="ScheduleFileDialog" to="." method="_on_schedule_file_dialog_file_selected"]
-[connection signal="dir_selected" from="PdfFileDialog" to="." method="_on_pdf_file_dialog_dir_selected"]
