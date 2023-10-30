@@ -62,7 +62,7 @@ func _on_website_file_dialog_file_selected(path) -> void:
 			var title:String = line[WEBSITE_TITLE_INDEX]
 			var id:String = line[WEBSITE_ID_INDEX]
 			if not data.has(id):
-				log_error("No match found for: " + title)
+				log_error("No match found for: \n" + title)
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
@@ -72,21 +72,21 @@ func _on_website_file_dialog_file_selected(path) -> void:
 	_download_pdfs()
 
 func _download_pdfs() -> void:
-	var counter = 0
 	for id in data.keys():
 		if data[id].has("pdf_link") and data[id]["pdf_link"].begins_with("https://www.sfscon.it/wp-content/uploads/"):
+			if http.request_completed.is_connected(_request_completed):
+				http.request_completed.disconnect(_request_completed)
 			http.request_completed.connect(_request_completed.bind(data[id]))
 			var error = http.request(data[id]["pdf_link"])
 			if error != OK:
 				log_error(error)
-			counter += 1
 			await http.request_completed
 		else:
-			log_error("No PDF found for: " + data[id]["title"])
+			log_error("No PDF found for: \n" + data[id]["title"])
 
 func _request_completed(result, response_code, headers, body, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
-		log_error("Talk with no room assigned: " + talk["title"])
+		log_error("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
 		return
 	var dir_name:String = talk["room"] + " - " + talk["track"]
@@ -107,4 +107,4 @@ func _prepare_dir(base_path:String, path:String) -> String:
 	return base_path + path
 
 func log_error(error:String) -> void:
-	errors.append_text(error + "\n")
+	errors.append_text(error + "\n\n")
