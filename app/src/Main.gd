@@ -36,6 +36,8 @@ func _ready() -> void:
 func _process(delta) -> void:
 	if counter_done < counter_all:
 		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_all]
+	elif counter_all == 0:
+		progress_label.text = "Something went wrong, restart please"
 	else:
 		progress_label.text = "Finished! Happy SFSCON :-)"
 	progress_bar.value = counter_done
@@ -109,3 +111,7 @@ func _prepare_dir(base_path:String, path:String) -> String:
 
 func log_error(error:String) -> void:
 	errors.append_text(error + "\n\n")
+
+
+func _on_restart_pressed():
+	get_tree().change_scene_to_file("res://src/Main.tscn")
