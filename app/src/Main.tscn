@@ -12,13 +12,9 @@ grow_vertical = 2
 script = ExtResource("1_3qsph")
 
 [node name="WebsiteFileDialog" type="FileDialog" parent="."]
-mode = 2
 title = "Open website export csv"
 initial_position = 2
 size = Vector2i(640, 360)
-visible = true
-unresizable = true
-borderless = true
 ok_button_text = "Open"
 dialog_close_on_escape = false
 mode_overrides_title = false

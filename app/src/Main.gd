@@ -1,6 +1,6 @@
 extends Control
 
-@onready var website_data_file_dialog:FileDialog = $WebsiteFileDialog
+@onready var file_dialog:FileDialog = $WebsiteFileDialog
 @onready var progress_label:Label = $Result/ProgressLabel
 @onready var progress_bar:ProgressBar = $Result/ProgressBar
 @onready var http:HTTPRequest = $HTTPRequest
@@ -31,6 +31,7 @@ var counter_all:int = 0
 
 func _ready() -> void:
 	_read_mapping()
+	file_dialog.show()
 
 func _process(delta) -> void:
 	if counter_done < counter_all:
@@ -52,7 +53,7 @@ func _read_mapping() -> void:
 			data[id]["track"] = line[MAPPING_TRACK_INDEX]
 
 func _on_website_file_dialog_file_selected(path) -> void:
-	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/PDF")
+	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/PDF/")
 	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
 	while not file.eof_reached():
