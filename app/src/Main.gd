@@ -79,7 +79,7 @@ func _on_website_file_dialog_file_selected(path) -> void:
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
-				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5)
+				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
 				data[id]["day"] = _get_day(day)
 				counter_all += 1
 	progress_bar.max_value = counter_all
@@ -104,13 +104,12 @@ func _request_completed(result, response_code, headers, body, talk:Dictionary) -
 		counter_done += 1
 		return
 	var dir_name:String = talk["day"]  + " - " + talk["room"] + " - " + talk["track"]
-	_prepare_dir(pdf_path, dir_name)
+	var path:String = _prepare_dir(pdf_path, dir_name)
 
-	# 1030 - Simon Dalvai - Developers track
-	var file_name:String = pdf_path + dir_name + "/" + talk["time"] + " - " + talk["name"] + " - " + talk["title"]
+	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], talk["title"]]
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
-	file.flush()
+	file.close()
 	counter_done += 1
 
 func _prepare_dir(base_path:String, path:String) -> String:
