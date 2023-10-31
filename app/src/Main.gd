@@ -22,6 +22,11 @@ const MAPPING_ROOM_INDEX = 4
 const MAPPING_TRACK_INDEX = 5
 const MAPPING_TITLE_INDEX = 6
 
+const DAY_MAPPING:Dictionary = { 
+	"10/11/2023" : "Day 1",
+	"11/11/2023" : "Day 2",
+}
+
 var pdf_path:String
 
 # stores the csv combined data
@@ -44,7 +49,8 @@ func _process(delta) -> void:
 
 func _read_mapping() -> void:
 	var file:FileAccess = FileAccess.open(MAPPING_FILE, FileAccess.READ)
-	
+	# skip first line
+	file.get_csv_line()
 	while not file.eof_reached():
 		var line:Array = file.get_csv_line()
 		if line.size() > 1:
@@ -55,21 +61,26 @@ func _read_mapping() -> void:
 			data[id]["track"] = line[MAPPING_TRACK_INDEX]
 
 func _on_website_file_dialog_file_selected(path) -> void:
-	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/PDF/")
+	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/")
 	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
+	# skip first line
+	file.get_csv_line()
 	while not file.eof_reached():
 		var line:Array = file.get_csv_line()
-		if line.size() > 1:
+		if line.size() > 1 and line[WEBSITE_STATUS_INDEX] == "approved":
 			var pdf_link:String = line[WEBSITE_PDF_LINK_INDEX]
 			var title:String = line[WEBSITE_TITLE_INDEX]
 			var id:String = line[WEBSITE_ID_INDEX]
+			var day:String = line[WEBSITE_DATE_INDEX]
+			
 			if not data.has(id):
 				log_error("No match found for: \n" + title)
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
 				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5)
+				data[id]["day"] = _get_day(day)
 				counter_all += 1
 	progress_bar.max_value = counter_all
 	_download_pdfs()
@@ -92,7 +103,7 @@ func _request_completed(result, response_code, headers, body, talk:Dictionary) -
 		log_error("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
 		return
-	var dir_name:String = talk["room"] + " - " + talk["track"]
+	var dir_name:String = talk["day"]  + " - " + talk["room"] + " - " + talk["track"]
 	_prepare_dir(pdf_path, dir_name)
 
 	# 1030 - Simon Dalvai - Developers track
@@ -108,6 +119,11 @@ func _prepare_dir(base_path:String, path:String) -> String:
 		dir.make_dir(base_path + path)
 	dir.change_dir(base_path + path)
 	return base_path + path
+
+func _get_day(day:String) -> String:
+	if DAY_MAPPING.has(day):
+		return DAY_MAPPING[day]
+	return "TBD"
 
 func log_error(error:String) -> void:
 	errors.append_text(error + "\n\n")
