@@ -6,7 +6,7 @@ extends Control
 @onready var http:HTTPRequest = $HTTPRequest
 @onready var errors:RichTextLabel = $Result/Errors
 
-# can't be csv, because Godot treats csv files as translations
+# can't be .csv, because Godot treats csv files as translations
 const MAPPING_FILE = "res://SFSCON-mapping.txt"
 
 const WEBSITE_ID_INDEX = 0
@@ -37,6 +37,7 @@ var counter_all:int = 0
 var config:ConfigFile
 
 func _ready() -> void:
+	# load last used path, if exists
 	config = ConfigFile.new()
 	config.load("user://settings.cfg")
 	pdf_path = config.get_value("settings", "pdf_path", "")
@@ -113,13 +114,12 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 		log_error("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
 		return
+	
 	var dir_name:String = talk["day"]  + " - " + talk["room"] + " - " + talk["track"]
 	var path:String = _prepare_dir(pdf_path, dir_name)
-	log_error(path)
 	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], talk["title"]]
 	file_name = file_name.replace("..",".")
 	file_name = file_name.replace("\n"," ")
-	print("path: ", file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
 	file.flush()
