@@ -62,7 +62,6 @@ func _read_mapping() -> void:
 
 func _on_website_file_dialog_file_selected(path) -> void:
 	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/")
-	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
 	# skip first line
 	file.get_csv_line()
@@ -93,25 +92,29 @@ func _download_pdfs() -> void:
 			http.request_completed.connect(_request_completed.bind(data[id]))
 			var error = http.request(data[id]["pdf_link"])
 			if error != OK:
+				print(error)
 				log_error(error)
 			await http.request_completed
 		else:
 			log_error("No PDF found for: \n" + data[id]["title"])
 
-func _request_completed(result, response_code, headers, body, talk:Dictionary) -> void:
+func _request_completed(result, response_code, headers, body:PackedByteArray, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
 		log_error("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
 		return
 	var dir_name:String = talk["day"]  + " - " + talk["room"] + " - " + talk["track"]
 	var path:String = _prepare_dir(pdf_path, dir_name)
-
+	log_error(path)
 	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], talk["title"]]
+	file_name = file_name.replace("..",".")
+	file_name = file_name.replace("\n"," ")
+	print("path: ", file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
-	file.close()
+	file.flush()
 	counter_done += 1
-
+	
 func _prepare_dir(base_path:String, path:String) -> String:
 	var dir = DirAccess.open(base_path)
 	if not dir.dir_exists(base_path + path):
