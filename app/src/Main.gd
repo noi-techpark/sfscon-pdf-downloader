@@ -34,8 +34,17 @@ var data:Dictionary = {}
 var counter_done:int = 0
 var counter_all:int = 0
 
+var config:ConfigFile
+
 func _ready() -> void:
+	config = ConfigFile.new()
+	config.load("user://settings.cfg")
+	pdf_path = config.get_value("settings", "pdf_path", "")
+	
 	_read_mapping()
+	
+	if not pdf_path.is_empty():
+		file_dialog.current_path = pdf_path
 	file_dialog.show()
 
 func _process(delta) -> void:
@@ -60,8 +69,9 @@ func _read_mapping() -> void:
 			data[id]["room"] = line[MAPPING_ROOM_INDEX]
 			data[id]["track"] = line[MAPPING_TRACK_INDEX]
 
-func _on_website_file_dialog_file_selected(path) -> void:
-	pdf_path = _prepare_dir(path.substr(0, path.rfind("/")) , "/")
+func _on_website_file_dialog_file_selected(path:String) -> void:
+	_save_pdf_path(path.get_base_dir())
+	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
 	# skip first line
 	file.get_csv_line()
@@ -130,6 +140,10 @@ func _get_day(day:String) -> String:
 func log_error(error:String) -> void:
 	errors.append_text(error + "\n\n")
 
+func _save_pdf_path(path:String) -> void:
+	pdf_path = path + "/"
+	config.set_value("settings", "pdf_path", pdf_path)
+	config.save("user://settings.cfg")
 
 func _on_restart_pressed():
 	get_tree().change_scene_to_file("res://src/Main.tscn")
