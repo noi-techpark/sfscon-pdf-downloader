@@ -40,7 +40,9 @@ const WINDOWS_NONVALID_CHARS:Array[String] = [
 		'\\',
 		'|',
 		'?',
-		'*'
+		'*',
+		'(',
+		')',
 ]
 
 
@@ -134,16 +136,25 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	
 	var dir_name:String = talk["day"]  + " - " + talk["room"] + " - " + talk["track"]
 	var path:String = _prepare_dir(pdf_path, dir_name)
-	var title:String = talk["title"].replace("/", "")
-	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], title]
+	var title:String = talk["title"]
+	
+#	var regex = RegEx.new()
+#	regex.compile("[a-zA-Z\\d\\s:]")
+#	title = regex.search(title).get_string()
+	
+	var file_name:String = "%s/%s - %s.pdf"%[path, talk["time"], talk["name"]]
 
 	
 	file_name = file_name.replace("..",".")
 	file_name = file_name.replace("\n"," ")
+	file_name = file_name.replace("\t","")
 	
-	for char in WINDOWS_NONVALID_CHARS:
-		file_name = file_name.replace(char,"")
+#	for char in WINDOWS_NONVALID_CHARS:
+#		file_name = file_name.replace(char,"")
+
 	
+	
+	file_name = file_name.simplify_path()
 	print(file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
