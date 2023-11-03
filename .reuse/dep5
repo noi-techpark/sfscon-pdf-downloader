@@ -1,0 +1,19 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: webcomp-boilerplate
+Upstream-Contact: NOI Techpark <digital@noi.bz.it>
+Source: https://github.com/noi-techpark/webcomp-boilerplate
+
+# Godot files
+Files: app/src/**.tscn app/project.godot app/**.import app/export_presets.*
+Copyright: 2023 (c) NOI Techpark <digital@noi.bz.it>
+License: AGPL-3.0-or-later
+
+# Config files
+Files: .github/* .gitignore .pre-commit-config.yaml LICENSE.md SFSCON-mapping.csv app/SFSCON-mapping.txt
+Copyright: 2023 (c) NOI Techpark <digital@noi.bz.it>
+License: CC0-1.0
+
+# Godot Engine logo
+Files: app/icon.svg
+Copyright: 2017, Andrea Calabró
+License: CC-BY-4.0

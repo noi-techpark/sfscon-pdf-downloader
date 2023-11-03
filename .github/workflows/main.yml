@@ -1,0 +1,22 @@
+name: CI/CD
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/prod'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Upload binaries to Github release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./FantaTimer.apk
+          asset_name: FantaTimer.apk
+          tag: v${{ env.VERSION_NAME }}
+          overwrite: true
+          body:  ${{ steps.changelog.outputs.RELEASE_BODY }}
