@@ -54,7 +54,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./SFSCON_Pdf_Downloader.exe
           asset_name: SFSCON_Pdf_Downloader.exe
-          tag: github.ref
+          tag: ${{ github.ref }}-Windows
           overwrite: true
           body:  "SFSCON Pdf Downloader tool for Windows"
 
@@ -73,6 +73,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./SFSCON_Pdf_Downloader.x86_64
           asset_name: SFSCON_Pdf_Downloader.x86_64
-          tag: github.ref
+          tag: ${{ github.ref }}-Linux
           overwrite: true
           body:  "SFSCON Pdf Downloader tool for Linux"
