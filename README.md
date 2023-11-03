@@ -10,9 +10,11 @@ SPDX-License-Identifier: CC0-1.0
 
 Tiny graphical application to download all speakers PDF files for SFSCON.  
 Then they are saved in the corresponding directory with the following scheme  
-`Day x/Room - Track/Time - Speaker - Title.pdf`  
+`Day x/Room - Track/Time - Speaker.pdf`  
 An real example would be  
-`Day 1/Seminar 3 - Developers Track/1520 - Simon Dalvai - F-Droid - The place for your FOSS Apps.pdf`
+`Day 1/Seminar 3 - Developers Track/1520 - Simon Dalvai.pdf`
+
+Note: The title is not used in the file name intentionally, because it causes a lot of problems with special characters etc.
 
 Created with the Godot Engine 4.1.x
 
