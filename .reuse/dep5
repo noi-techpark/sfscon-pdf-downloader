@@ -4,7 +4,7 @@ Upstream-Contact: NOI Techpark <digital@noi.bz.it>
 Source: https://github.com/noi-techpark/webcomp-boilerplate
 
 # Godot files
-Files: app/src/**.tscn app/project.godot app/**.import app/export_presets.*
+Files: app/src/**.tscn app/project.godot app/**.import app/export_presets.* app/theme.tres
 Copyright: 2023 (c) NOI Techpark <digital@noi.bz.it>
 License: AGPL-3.0-or-later
 
