@@ -40,7 +40,6 @@ var counter_done:int = 0
 var counter_pdf:int = 0
 var counter_total:int = 0
 
-
 var config:ConfigFile
 
 func _ready() -> void:
@@ -64,7 +63,6 @@ func _process(delta) -> void:
 		progress_label.text = "Finished! Happy SFSCON :-)"
 	progress_bar.value = counter_done
 	
-	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
 
 func _read_mapping() -> void:
 	var file:FileAccess = FileAccess.open(MAPPING_FILE, FileAccess.READ)
@@ -92,11 +90,9 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 			var title:String = line[WEBSITE_TITLE_INDEX]
 			var id:String = line[WEBSITE_ID_INDEX]
 			var day:String = line[WEBSITE_DATE_INDEX]
-			
 			counter_total += 1
-			
 			if not data.has(id):
-				log_error("No match found for: \n" + title)
+				log_error("No match found for: \n" + line[WEBSITE_TITLE_INDEX])
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
@@ -104,6 +100,7 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 				data[id]["day"] = _get_day(day)
 				counter_pdf += 1
 	progress_bar.max_value = counter_pdf
+	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
 	_download_pdfs()
 
 func _download_pdfs() -> void:
@@ -130,11 +127,8 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	var title:String = talk["title"]
 	
 	var file_name:String = "%s/%s - %s.pdf"%[path, talk["time"], talk["name"]]
-	
-	file_name = file_name.replace("..",".")
-	file_name = file_name.replace("\n"," ")
-	file_name = file_name.replace("\t","")
-	
+	# remove new lines, double points and tabs
+	file_name = file_name.replace("..",".").replace("\n"," ").replace("\t","")
 	print(file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
