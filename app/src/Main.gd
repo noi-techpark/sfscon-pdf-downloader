@@ -6,6 +6,7 @@ extends Control
 
 @onready var file_dialog:FileDialog = $WebsiteFileDialog
 @onready var progress_label:Label = $Result/ProgressLabel
+@onready var statistics_label:Label = $Result/Statistics
 @onready var progress_bar:ProgressBar = $Result/ProgressBar
 @onready var http:HTTPRequest = $HTTPRequest
 @onready var errors:RichTextLabel = $Result/Errors
@@ -31,27 +32,14 @@ const DAY_MAPPING:Dictionary = {
 	"11/11/2023" : "Day 2",
 }
 
-	# not valid characters in windows paths
-const WINDOWS_NONVALID_CHARS:Array[String] = [
-		'<',
-		'>',
-		':',
-		'"',
-		'\\',
-		'|',
-		'?',
-		'*',
-		'(',
-		')',
-]
-
-
 var pdf_path:String
 
 # stores the csv combined data
 var data:Dictionary = {}
 var counter_done:int = 0
-var counter_all:int = 0
+var counter_pdf:int = 0
+var counter_total:int = 0
+
 
 var config:ConfigFile
 
@@ -68,13 +56,15 @@ func _ready() -> void:
 	file_dialog.show()
 
 func _process(delta) -> void:
-	if counter_done < counter_all:
-		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_all]
-	elif counter_all == 0:
+	if counter_done < counter_pdf:
+		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_pdf]
+	elif counter_pdf == 0:
 		progress_label.text = "Something went wrong, restart please"
 	else:
 		progress_label.text = "Finished! Happy SFSCON :-)"
 	progress_bar.value = counter_done
+	
+	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
 
 func _read_mapping() -> void:
 	var file:FileAccess = FileAccess.open(MAPPING_FILE, FileAccess.READ)
@@ -103,6 +93,8 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 			var id:String = line[WEBSITE_ID_INDEX]
 			var day:String = line[WEBSITE_DATE_INDEX]
 			
+			counter_total += 1
+			
 			if not data.has(id):
 				log_error("No match found for: \n" + title)
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
@@ -110,8 +102,8 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 				data[id]["name"] = line[WEBSITE_NAME_INDEX]
 				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
 				data[id]["day"] = _get_day(day)
-				counter_all += 1
-	progress_bar.max_value = counter_all
+				counter_pdf += 1
+	progress_bar.max_value = counter_pdf
 	_download_pdfs()
 
 func _download_pdfs() -> void:
@@ -123,7 +115,6 @@ func _download_pdfs() -> void:
 			var error = http.request(data[id]["pdf_link"])
 			if error != OK:
 				print(error)
-				log_error(error)
 			await http.request_completed
 		else:
 			log_error("No PDF found for: \n" + data[id]["title"])
@@ -138,23 +129,12 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	var path:String = _prepare_dir(pdf_path, dir_name)
 	var title:String = talk["title"]
 	
-#	var regex = RegEx.new()
-#	regex.compile("[a-zA-Z\\d\\s:]")
-#	title = regex.search(title).get_string()
-	
 	var file_name:String = "%s/%s - %s.pdf"%[path, talk["time"], talk["name"]]
-
 	
 	file_name = file_name.replace("..",".")
 	file_name = file_name.replace("\n"," ")
 	file_name = file_name.replace("\t","")
 	
-#	for char in WINDOWS_NONVALID_CHARS:
-#		file_name = file_name.replace(char,"")
-
-	
-	
-	file_name = file_name.simplify_path()
 	print(file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)

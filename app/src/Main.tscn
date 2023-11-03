@@ -14,7 +14,7 @@ script = ExtResource("1_3qsph")
 [node name="WebsiteFileDialog" type="FileDialog" parent="."]
 title = "Open website export csv"
 initial_position = 2
-size = Vector2i(640, 360)
+size = Vector2i(1280, 720)
 ok_button_text = "Open"
 dialog_close_on_escape = false
 mode_overrides_title = false
@@ -29,16 +29,22 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -170.5
-offset_right = 200.0
-offset_bottom = 170.5
+offset_left = -515.0
+offset_top = -244.0
+offset_right = 516.0
+offset_bottom = 307.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 10
 
 [node name="Errors" type="RichTextLabel" parent="Result"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="Statistics" type="Label" parent="Result"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+horizontal_alignment = 1
 
 [node name="ProgressLabel" type="Label" parent="Result"]
 custom_minimum_size = Vector2(200, 0)
