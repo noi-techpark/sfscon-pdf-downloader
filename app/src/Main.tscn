@@ -37,10 +37,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
 
-[node name="Errors" type="RichTextLabel" parent="Result"]
-layout_mode = 2
-size_flags_vertical = 3
-
 [node name="Statistics" type="Label" parent="Result"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
@@ -55,6 +51,20 @@ horizontal_alignment = 1
 [node name="ProgressBar" type="ProgressBar" parent="Result"]
 layout_mode = 2
 step = 1.0
+
+[node name="HSeparator" type="HSeparator" parent="Result"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="ErrorsLabel" type="Label" parent="Result"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "TALKS WITH NO PDF"
+
+[node name="Errors" type="RichTextLabel" parent="Result"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Restart" type="Button" parent="."]
 layout_mode = 1

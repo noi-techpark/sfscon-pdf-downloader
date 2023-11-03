@@ -92,10 +92,10 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 			var day:String = line[WEBSITE_DATE_INDEX]
 			counter_total += 1
 			if not data.has(id):
-				log_error("No match found for: \n" + line[WEBSITE_TITLE_INDEX])
+				print("No match found for: \n" + line[WEBSITE_TITLE_INDEX])
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
-				data[id]["name"] = line[WEBSITE_NAME_INDEX]
+				data[id]["speaker"] = line[WEBSITE_NAME_INDEX]
 				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
 				data[id]["day"] = _get_day(day)
 				counter_pdf += 1
@@ -114,11 +114,11 @@ func _download_pdfs() -> void:
 				print(error)
 			await http.request_completed
 		else:
-			log_error("No PDF found for: \n" + data[id]["title"])
+			errors.append_text(data[id]["title"] + "\n\n")
 
 func _request_completed(result, response_code, headers, body:PackedByteArray, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
-		log_error("Talk with no room assigned: \n" + talk["title"])
+		print("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
 		return
 	
@@ -126,7 +126,7 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	var path:String = _prepare_dir(pdf_path, dir_name)
 	var title:String = talk["title"]
 	
-	var file_name:String = "%s/%s - %s.pdf"%[path, talk["time"], talk["name"]]
+	var file_name:String = "%s/%s - %s.pdf"%[path, talk["time"], talk["speaker"]]
 	# remove new lines, double points and tabs
 	file_name = file_name.replace("..",".").replace("\n"," ").replace("\t","")
 	print(file_name)
@@ -146,9 +146,6 @@ func _get_day(day:String) -> String:
 	if DAY_MAPPING.has(day):
 		return DAY_MAPPING[day]
 	return "TBD"
-
-func log_error(error:String) -> void:
-	errors.append_text(error + "\n\n")
 
 func _save_pdf_path(path:String) -> void:
 	pdf_path = path + "/"
