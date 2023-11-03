@@ -43,7 +43,7 @@ jobs:
       # WINDOWS
       ####################
       - name: Prepare export_presets.cfg for Windows
-        run: cp app/export_presets.cfg.windows.example cp app/export_presets.cfg
+        run: cp app/export_presets.cfg.windows.example app/export_presets.cfg
 
       - name: Export Godot 4
         run: godot --headless --path app/project.godot --export-release 'Windows Desktop' ../SFSCON_Pdf_Downloader.exe
@@ -62,7 +62,7 @@ jobs:
       # Linux
       ####################
       - name: Prepare export_presets.cfg for Linux
-        run: cp app/export_presets.cfg.linux.example cp app/export_presets.cfg
+        run: cp app/export_presets.cfg.linux.example app/export_presets.cfg
 
       - name: Export Godot 4
         run: godot --headless --path app/project.godot --export-release 'Linux/X11' ../SFSCON_Pdf_Downloader.x86_64
