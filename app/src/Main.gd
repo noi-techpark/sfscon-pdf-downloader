@@ -124,6 +124,8 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], talk["title"]]
 	file_name = file_name.replace("..",".")
 	file_name = file_name.replace("\n"," ")
+	file_name = file_name.replace(":"," ")
+	print(file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
 	file.flush()
