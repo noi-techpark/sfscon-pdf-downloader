@@ -5,6 +5,9 @@ SPDX-License-Identifier: CC0-1.0
 -->
 
 # SFSCON Pdf Downloader
+
+[![REUSE Compliance](https://github.com/noi-techpark/sfscon-pdf-downloader/actions/workflows/reuse.yml/badge.svg)](https://github.com/noi-techpark/odh-docs/wiki/REUSE#badges)
+
 Tiny graphical application to download all speakers PDF files for SFSCON.  
 Then they are saved in the corresponding directory with the following scheme  
 `Day x/Room - Track/Time - Speaker - Title.pdf`  
