@@ -31,6 +31,19 @@ const DAY_MAPPING:Dictionary = {
 	"11/11/2023" : "Day 2",
 }
 
+	# not valid characters in windows paths
+const WINDOWS_NONVALID_CHARS:Array[String] = [
+		'<',
+		'>',
+		':',
+		'"',
+		'\\',
+		'|',
+		'?',
+		'*'
+]
+
+
 var pdf_path:String
 
 # stores the csv combined data
@@ -121,11 +134,15 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	
 	var dir_name:String = talk["day"]  + " - " + talk["room"] + " - " + talk["track"]
 	var path:String = _prepare_dir(pdf_path, dir_name)
-	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], talk["title"]]
+	var title:String = talk["title"].replace("/", "")
+	var file_name:String = "%s/%s - %s - %s.pdf"%[path, talk["time"], talk["name"], title]
+
+	
 	file_name = file_name.replace("..",".")
 	file_name = file_name.replace("\n"," ")
-	file_name = file_name.replace(":","")
-	file_name = file_name.replace("?","")
+	
+	for char in WINDOWS_NONVALID_CHARS:
+		file_name = file_name.replace(char,"")
 	
 	print(file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
