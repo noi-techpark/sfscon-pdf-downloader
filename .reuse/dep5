@@ -9,7 +9,7 @@ Copyright: 2023 (c) NOI Techpark <digital@noi.bz.it>
 License: AGPL-3.0-or-later
 
 # Config files
-Files: .github/* .gitignore .pre-commit-config.yaml LICENSE.md SFSCON-mapping.csv app/SFSCON-mapping.txt
+Files: .github/* .gitignore .pre-commit-config.yaml LICENSE.md SFSCON-mapping.ods app/SFSCON-mapping.txt
 Copyright: 2023 (c) NOI Techpark <digital@noi.bz.it>
 License: CC0-1.0
 
