@@ -120,7 +120,7 @@ func _download_pdfs() -> void:
 				print(error)
 			await http.request_completed
 		else:
-			errors.append_text("- " + data[id]["title"] + "\n\n")
+			errors.append_text("- " + data[id]["title"] + "\n")
 
 func _request_completed(result, response_code, headers, body:PackedByteArray, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
@@ -141,7 +141,7 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	file.flush()
 	
 	if not FileAccess.file_exists(file_name):
-		errors2.append_text("- " + file_name + "\n\n")
+		errors2.append_text("- " + file_name + "\n")
 	counter_done += 1
 	
 func _prepare_dir(base_path:String, path:String) -> String:
