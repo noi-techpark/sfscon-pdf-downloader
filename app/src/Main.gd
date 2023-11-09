@@ -10,6 +10,7 @@ extends Control
 @onready var progress_bar:ProgressBar = $Result/ProgressBar
 @onready var http:HTTPRequest = $HTTPRequest
 @onready var errors:RichTextLabel = $Result/Errors
+@onready var errors2:RichTextLabel = $Result/Errors2
 
 # can't be .csv, because Godot treats csv files as translations
 const MAPPING_FILE = "res://SFSCON-mapping.txt"
@@ -42,6 +43,9 @@ var counter_total:int = 0
 
 var config:ConfigFile
 
+var regex = RegEx.new()
+
+
 func _ready() -> void:
 	# load last used path, if exists
 	config = ConfigFile.new()
@@ -53,6 +57,8 @@ func _ready() -> void:
 	if not pdf_path.is_empty():
 		file_dialog.current_path = pdf_path
 	file_dialog.show()
+	
+	regex.compile("\\w+")
 
 func _process(delta) -> void:
 	if counter_done < counter_pdf:
@@ -95,7 +101,7 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 				print("No match found for: \n" + line[WEBSITE_TITLE_INDEX])
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
-				data[id]["speaker"] = _lint_speaker(line[WEBSITE_NAME_INDEX])
+				data[id]["speaker"] = _escape_speaker(line[WEBSITE_NAME_INDEX])
 				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
 				data[id]["day"] = _get_day(day)
 				counter_pdf += 1
@@ -114,7 +120,7 @@ func _download_pdfs() -> void:
 				print(error)
 			await http.request_completed
 		else:
-			errors.append_text(data[id]["title"] + "\n\n")
+			errors.append_text("- " + data[id]["title"] + "\n\n")
 
 func _request_completed(result, response_code, headers, body:PackedByteArray, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
@@ -128,11 +134,14 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	
 	var file_name:String = "%s/%s - %s.pdf"%[path, talk["time"], talk["speaker"]]
 	# remove new lines, double points and tabs
-	file_name = file_name.replace("..",".").replace("\n"," ").replace("\t","")
+	file_name = file_name.replace("..",".").strip_escapes()
 	print(file_name)
 	var file:FileAccess = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_buffer(body)
 	file.flush()
+	
+	if not FileAccess.file_exists(file_name):
+		errors2.append_text("- " + file_name + "\n\n")
 	counter_done += 1
 	
 func _prepare_dir(base_path:String, path:String) -> String:
@@ -147,8 +156,19 @@ func _get_day(day:String) -> String:
 		return DAY_MAPPING[day]
 	return "TBD"
 	
-func _lint_speaker(speaker:String) -> String:
-	return speaker
+func _escape_speaker(speaker:String) -> String:
+	var results:Array[RegExMatch] = regex.search_all(speaker)
+	var escaped = "";
+	
+	# remove non alphanumerical characters
+	if results:
+		for result in results:
+			escaped += " " + result.get_string()
+			
+	# other escapes
+	escaped = escaped.strip_escapes()
+	escaped = escaped.strip_edges()
+	return escaped
 	
 
 func _save_pdf_path(path:String) -> void:
