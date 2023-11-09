@@ -100,7 +100,7 @@ ID,Year,Date,Hour,Room,Track,Title,Tracks,Rooms
 6398,2023,10/11/2023,12:00:00,Seminar 1,Main Track,Flaky tests – how to deal with them,,
 6268,2023,10/11/2023,11:40:00,Seminar 4,Cybersecurity Track,Predict security attacks in FOSS,,
 6381,2023,10/11/2023,11:40:00,Seminar 3,Community Track,Transforming South Tyrol’s Economy: Empowering Tourism and Agriculture through Decentralized Applications (dApps),,
-6465,2023,10/11/2023,11:40:00,#N/A,,Nextcloud – how to keep up with the fast moving IT world,,
+6465,2023,10/11/2023,11:40:00,Seminar 2,Artificial Intelligence Track,Nextcloud – do you know?,,
 6452,2023,10/11/2023,11:40:00,Seminar 1,Main Track,"Pyccel: write Python code, get Fortran speed",,
 6354,2023,✗,✗,#N/A,,Making the Internet Trustworthy,,
 6395,2023,10/11/2023,11:20:00,Seminar 3,Community Track,Community tidbits,,

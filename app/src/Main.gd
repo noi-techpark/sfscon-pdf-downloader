@@ -95,7 +95,7 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 				print("No match found for: \n" + line[WEBSITE_TITLE_INDEX])
 			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 				data[id]["pdf_link"] = pdf_link
-				data[id]["speaker"] = line[WEBSITE_NAME_INDEX]
+				data[id]["speaker"] = _lint_speaker(line[WEBSITE_NAME_INDEX])
 				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
 				data[id]["day"] = _get_day(day)
 				counter_pdf += 1
@@ -146,6 +146,10 @@ func _get_day(day:String) -> String:
 	if DAY_MAPPING.has(day):
 		return DAY_MAPPING[day]
 	return "TBD"
+	
+func _lint_speaker(speaker:String) -> String:
+	return speaker
+	
 
 func _save_pdf_path(path:String) -> void:
 	pdf_path = path + "/"
