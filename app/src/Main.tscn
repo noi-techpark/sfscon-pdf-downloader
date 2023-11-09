@@ -65,6 +65,8 @@ text = "TALKS WITH NO PDF"
 [node name="Errors" type="RichTextLabel" parent="Result"]
 layout_mode = 2
 size_flags_vertical = 3
+focus_mode = 2
+selection_enabled = true
 
 [node name="ErrorsLabel2" type="Label" parent="Result"]
 custom_minimum_size = Vector2(200, 0)
@@ -74,6 +76,8 @@ text = "PROBLEMS SAVING PDF"
 [node name="Errors2" type="RichTextLabel" parent="Result"]
 layout_mode = 2
 size_flags_vertical = 3
+focus_mode = 2
+selection_enabled = true
 
 [node name="Restart" type="Button" parent="."]
 layout_mode = 1

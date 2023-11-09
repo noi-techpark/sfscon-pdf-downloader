@@ -91,20 +91,25 @@ func _on_website_file_dialog_file_selected(path:String) -> void:
 	file.get_csv_line()
 	while not file.eof_reached():
 		var line:Array = file.get_csv_line()
-		if line.size() > 1 and line[WEBSITE_STATUS_INDEX] == "approved":
-			var pdf_link:String = line[WEBSITE_PDF_LINK_INDEX]
-			var title:String = line[WEBSITE_TITLE_INDEX]
+		if line.size() > 1:
 			var id:String = line[WEBSITE_ID_INDEX]
-			var day:String = line[WEBSITE_DATE_INDEX]
-			counter_total += 1
-			if not data.has(id):
-				print("No match found for: \n" + line[WEBSITE_TITLE_INDEX])
-			elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
-				data[id]["pdf_link"] = pdf_link
-				data[id]["speaker"] = _escape_speaker(line[WEBSITE_NAME_INDEX])
-				data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
-				data[id]["day"] = _get_day(day)
-				counter_pdf += 1
+			if _is_approved(line):
+				var pdf_link:String = line[WEBSITE_PDF_LINK_INDEX]
+				var title:String = line[WEBSITE_TITLE_INDEX]
+				
+				var day:String = line[WEBSITE_DATE_INDEX]
+				counter_total += 1
+				if not data.has(id):
+					errors.append_text(str(errors.get_line_count()) + ") " + title + "\n")
+				elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
+					data[id]["pdf_link"] = pdf_link
+					data[id]["speaker"] = _escape_speaker(line[WEBSITE_NAME_INDEX])
+					data[id]["time"] = line[WEBSITE_TIME_INDEX].substr(0,5).replace(":", "")
+					data[id]["day"] = _get_day(day)
+					counter_pdf += 1
+			else:
+				data.erase(id)
+				print("not approved ", line[WEBSITE_TITLE_INDEX])
 	progress_bar.max_value = counter_pdf
 	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
 	_download_pdfs()
@@ -120,7 +125,7 @@ func _download_pdfs() -> void:
 				print(error)
 			await http.request_completed
 		else:
-			errors.append_text("- " + data[id]["title"] + "\n")
+			errors.append_text(str(errors.get_line_count()) + ") " + data[id]["title"] + "\n")
 
 func _request_completed(result, response_code, headers, body:PackedByteArray, talk:Dictionary) -> void:
 	if talk["track"].length() == 0:
@@ -141,7 +146,7 @@ func _request_completed(result, response_code, headers, body:PackedByteArray, ta
 	file.flush()
 	
 	if not FileAccess.file_exists(file_name):
-		errors2.append_text("- " + file_name + "\n")
+		errors2.append_text(str(errors2.get_line_count()) + ") " + file_name + "\n")
 	counter_done += 1
 	
 func _prepare_dir(base_path:String, path:String) -> String:
@@ -178,3 +183,12 @@ func _save_pdf_path(path:String) -> void:
 
 func _on_restart_pressed():
 	get_tree().change_scene_to_file("res://src/Main.tscn")
+
+func _is_approved(line:Array) -> bool:
+	var date:String = line[WEBSITE_TIME_INDEX]
+	var time:String = line[WEBSITE_TIME_INDEX]
+	if date == "✗":
+		return false
+	if time == "✗":
+		return false
+	return true
