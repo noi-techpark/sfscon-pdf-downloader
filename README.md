@@ -37,6 +37,11 @@ To run this application, you need a valid [SFSCON-mapping.csv](SFSCON-mapping.cs
 Once you created the mapping, copy it into the app directory in a txt format  
 `cp SFSCON-mapping.csv app/SFSCON-mapping.txt`
 
+This file is currently needed, because the csv export of the SFSCON website backend does not have the track and room assigned to a talk.
+That information is needed, to create the final outputs directory and file name structure.  
+If in future the track/room are already in the exported file, this mapping is not needed.
+(but of course a bit of coding to adapt everything to work without the mapping file is needed)
+
 Note: Godot sees csv files as translations files and does per default convert them in other files etc.
 To prevent this behavior, the file can simply be in a txt format.
 
