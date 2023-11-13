@@ -66,7 +66,7 @@ ID,Year,Date,Hour,Room,Track,Title,Tracks,Rooms
 6444,2023,10/11/2023,15:00:00,Seminar 2,Legal track,Windows and Office “tax” refund,,
 6427,2023,10/11/2023,15:00:00,Seminar 1,Developers track,F-Droid – The place for your FOSS Apps,,
 6404,2023,10/11/2023,14:40:00,Seminar 4,Public Money Public Code & Open Data track,Interoperable Europe Act: A real game changer?,,
-6438,2023,10/11/2023,14:40:00,Seminar 3,OW2 Track,AI Law &amp,,
+6438,2023,10/11/2023,14:40:00,Seminar 2,Legal Track,AI Law &amp,,
 6277,2023,10/11/2023,17:00:00,Seminar 3,Community Track,Open Tracing Tools: Overview and Comparison,,
 6264,2023,10/11/2023,14:20:00,Seminar 4,Public Money Public Code & Open Data track,Why Do We Need A Next Generation Internet?,,
 6330,2023,10/11/2023,16:40:00,Auditorium (A2),Data4SmartHealth,Machine learning driven simulation of protein folding atomistic trajectories,,
