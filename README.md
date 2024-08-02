@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 [![REUSE Compliance](https://github.com/noi-techpark/sfscon-pdf-downloader/actions/workflows/reuse.yml/badge.svg)](https://github.com/noi-techpark/odh-docs/wiki/REUSE#badges)
 
-Tiny graphical application to download all speakers PDF files for SFSCON.  
+Tiny GUI application to download all speakers PDF files for SFSCON.  
 Then they are saved in the corresponding directory with the following scheme  
 `Day x/Room - Track/Time - Speaker.pdf`  
 An real example would be  
@@ -16,45 +16,32 @@ An real example would be
 
 Note: The title is not used in the file name intentionally, because it causes a lot of problems with special characters etc.
 
-Created with the Godot Engine 4.1.x
+Created with the Godot Engine 4.2.2
 
 ## Table of content
 - [SFSCON Pdf Downloader](#sfscon-pdf-downloader)
   - [Table of content](#table-of-content)
+  - [How to use](#how-to-use)
   - [Prerequisites](#prerequisites)
-  - [Configuration](#configuration)
   - [Getting started](#getting-started)
-  - [How to](#how-to)
   - [License](#license)
   - [REUSE](#reuse)
 
 
-## Prerequisites
-To develop and build the application, you need the Godot 4.1.x executable you can download from https://godotengine.org/download
-
-## Configuration
-To run this application, you need a valid [SFSCON-mapping.csv](SFSCON-mapping.csv) file with the correct mapping for talks to their track and room.
-Once you created the mapping, copy it into the app directory in a txt format  
-`cp SFSCON-mapping.csv app/SFSCON-mapping.txt`
-
-This file is currently needed, because the csv export of the SFSCON website backend does not have the track and room assigned to a talk.
-That information is needed, to create the final outputs directory and file name structure.  
-If in future the track/room are already in the exported file, this mapping is not needed.
-(but of course a bit of coding to adapt everything to work without the mapping file is needed)
-
-Note: Godot sees csv files as translations files and does per default convert them in other files etc.
-To prevent this behavior, the file can simply be in a txt format.
-
-## Getting started
-Open the Godot Engine executable and open the [app/project.godot](app/project.godot) file to open the project.
-
-## How to
-Once you started the application, you need to open the talks csv file, you exported from the SFSCON admin page.
+## How to use
+Once you started the application, you need to open the talks csv file, you exported from the SFSCON admin page, under the talks section.
 Then the application auto-magically creates all the directories and puts the Pdf files in their correct places.
 The directories and Pdf files will be created in the same directory, the talk csv file is located.
 After the first time, the path is saved, so on next opening, the file dialog already shows the correct directory.
 
 You can read eventual errors or talks without Pdf in the error log. 
+
+## Prerequisites
+To develop and build the application, you need the Godot 4.2.2 executable you can download from https://godotengine.org/download.  
+If a new version is available, Godot upgrades the project automatically to the latest version. But some functionality might break.
+
+## Getting started
+Open the Godot Engine executable and open the [app/project.godot](app/project.godot) file to open the project.
 
 ## License
 The code in this project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 license. See the [LICENSE.md](LICENSE.md) file for more information.
