@@ -7,7 +7,7 @@ extends Control
 # column keys are case-insensitive
 const ID_KEY: String = "id"
 const DATE_KEY: String = "date"
-const TIME_KEY: String = "time" 
+const TIME_KEY: String = "hour" 
 const TITLE_KEY: String = "title"
 const ROOM_KEY: String = "room"
 const TRACK_KEY: String = "tracks"
@@ -100,11 +100,11 @@ func _save_config(path: String) -> void:
 	config.save("user://settings.cfg")
 
 
-func _process(delta) -> void:
+func _process(delta: float) -> void:
 	if counter_done < counter_pdf:
 		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_pdf]
 	elif counter_pdf == 0:
-		progress_label.text = "Something went wrong, restart please"
+		progress_label.text = "No PDF generated, probably somehting went wrong.\nPlease restart."
 	else:
 		progress_label.text = "Finished! Happy SFSCON :-)"
 	progress_bar.value = counter_done
@@ -121,12 +121,15 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
 	
 	# search for key index values on header row
-	var header: PackedStringArray = file.get_csv_line()
+	var header_line: PackedStringArray = file.get_csv_line()
+	
+	var headers: Array[String] = []
+	# transofrm to array and make lower case
+	for header: String in header_line:
+		headers.append(header.to_lower())
 	
 	for key: String in keys_index.keys():
-		keys_index[key] = header.find(key)
-	
-	
+		keys_index[key] = headers.find(key.to_lower())
 	
 	while not file.eof_reached():
 		var line: Array = file.get_csv_line()
@@ -143,12 +146,12 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 				elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 					data[id]["pdf_link"] = pdf_link
 					data[id]["speaker"] = _escape_string(keys_index[SPEAKER_KEY])
-					data[id]["time"] = keys_index[TIME_KEY].substr(0,5).replace(":", "")
+					data[id]["time"] = line[keys_index[TIME_KEY]].substr(0,5).replace(":", "")
 					data[id]["day"] = _get_day(date)
 					counter_pdf += 1
 			else:
 				data.erase(id)
-				print("not approved ", keys_index[TITLE_KEY])
+				print("not approved ", line[keys_index[TITLE_KEY]])
 	progress_bar.max_value = counter_pdf
 	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
 	_download_pdfs()
@@ -170,7 +173,7 @@ func _download_pdfs() -> void:
 			errors.append_text(str(errors.get_line_count()) + ") " + data[id]["title"] + "\n")
 
 
-func _request_completed(result, response_code, headers, body:PackedByteArray, talk:Dictionary) -> void:
+func _request_completed(result, response_code, headers, body: PackedByteArray, talk: Dictionary) -> void:
 	if talk["track"].length() == 0:
 		print("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
