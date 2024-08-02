@@ -37,36 +37,6 @@ modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="DayConfig1" type="HBoxContainer" parent="Settings"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="Description" type="Label" parent="Settings/DayConfig1"]
-layout_mode = 2
-text = "Day 1"
-horizontal_alignment = 1
-
-[node name="Day1" type="LineEdit" parent="Settings/DayConfig1"]
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-placeholder_text = "2024-11-04"
-
-[node name="DayConfig2" type="HBoxContainer" parent="Settings"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="Description" type="Label" parent="Settings/DayConfig2"]
-layout_mode = 2
-text = "Day 2"
-horizontal_alignment = 1
-
-[node name="Day2" type="LineEdit" parent="Settings/DayConfig2"]
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-placeholder_text = "2024-11-05"
-
 [node name="PdfConfig" type="HBoxContainer" parent="Settings"]
 layout_mode = 2
 theme_override_constants/separation = 5
@@ -181,8 +151,6 @@ metadata/_edit_use_anchors_ = true
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
 use_threads = true
 
-[connection signal="text_changed" from="Settings/DayConfig1/Day1" to="." method="_on_day_1_text_changed"]
-[connection signal="text_changed" from="Settings/DayConfig2/Day2" to="." method="_on_day_2_text_changed"]
 [connection signal="toggled" from="Settings/PdfConfig/TimeCheckbox" to="." method="_on_time_checkbox_toggled"]
 [connection signal="toggled" from="Settings/PdfConfig/TitleCheckBox" to="." method="_on_title_check_box_toggled"]
 [connection signal="toggled" from="Settings/PdfConfig/RegexCheckbox" to="." method="_on_regex_checkbox_toggled"]

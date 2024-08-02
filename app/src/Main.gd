@@ -34,9 +34,6 @@ const PDF_LINK_KEY: String = "pdf presentation"
 @onready var title_checkbox: CheckBox = $Settings/PdfConfig/TitleCheckBox
 @onready var regex_checkbox: CheckBox = $Settings/PdfConfig/RegexCheckbox
 
-@onready var day_1: LineEdit = $Settings/DayConfig1/Day1
-@onready var day_2: LineEdit = $Settings/DayConfig2/Day2
-
 @onready var submit: Button = $Settings/Submit
 
 var keys_index: Dictionary = {
@@ -51,9 +48,7 @@ var keys_index: Dictionary = {
 	PDF_LINK_KEY: -1,
 }
 
-#"10/11/2024" : "Day 1"
-#"11/11/2024" : "Day 2"
-var day_mapping: Dictionary  = {} 
+var day_mapping: Dictionary = {}
 
 var pdf_path: String
 
@@ -76,14 +71,6 @@ func _ready() -> void:
 
 	_load_config()
 	
-	# restore day mapping
-	for day: String in day_mapping.keys():
-		if day_mapping[day] == "Day 1":
-			day_1.text = day
-		elif day_mapping[day] == "Day 2":
-			day_2.text = day
-	submit.disabled = not _is_valid_date(day_1.text) or not _is_valid_date(day_2.text)
-	
 	time_checkbox.button_pressed = include_time
 	title_checkbox.button_pressed = include_title
 	regex_checkbox.button_pressed = include_special_characters
@@ -101,7 +88,6 @@ func _load_config() -> void:
 	include_title = config.get_value("settings", "include_title", true)
 	include_time = config.get_value("settings", "include_time", true)
 	include_special_characters = config.get_value("settings", "include_special_characters", true)
-	day_mapping = config.get_value("settings", "day_mapping" , {})
 
 
 func _save_config(path: String) -> void:
@@ -110,7 +96,6 @@ func _save_config(path: String) -> void:
 	config.set_value("settings", "include_title", include_title)
 	config.set_value("settings", "include_time", include_time)
 	config.set_value("settings", "include_special_characters", include_special_characters)
-	config.set_value("settings", "day_mapping", day_mapping)
 	config.save("user://settings.cfg")
 
 
@@ -161,11 +146,33 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 					data[id]["pdf_link"] = pdf_link
 					data[id]["speaker"] = _escape_string(keys_index[SPEAKER_KEY])
 					data[id]["time"] = line[keys_index[TIME_KEY]].substr(0,5).replace(":", "")
-					data[id]["day"] = _get_day(date)
+					data[id]["date"] = date
 					counter_pdf += 1
 			else:
 				data.erase(id)
 				print("not approved ", line[keys_index[TITLE_KEY]])
+	
+	# TREMENDOUS HACK, don't try this at home, these stunts are performed by trained professionals
+	# convert date into day 1, day 2, day 3...
+	for talk: Dictionary in data:
+		var date: String = talk["date"]
+		var date_parts: Array[String] = date.split("/")
+		# day format 31/12/24
+		var day: int = int(date_parts[0])
+		var month: int = int(date_parts[1])
+		var year: int = int(date_parts[2])
+		year += 2000 # SFSCON still in year 3000 using this tool? COOL!
+		
+		# convert to ISO 8601 format 2024-12-31
+		var iso_date: String = "%d-%d-%d"%[year, month, date]
+		var date_dict: Dictionary = Time.get_datetime_dict_from_datetime_string(iso_date, false)
+		var date_unix: int = Time.get_unix_time_from_datetime_string(iso_date)
+		
+		if not day_mapping.has(date):
+			day_mapping[date] = ""
+	
+	
+	
 	progress_bar.max_value = counter_pdf
 	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
 	_download_pdfs()
@@ -294,18 +301,6 @@ func _format_file_name(time: String, title: String, speaker: String) -> String:
 	
 	return text
 
-
-func _on_day_1_text_changed(new_text: String) -> void:
-	submit.disabled = not _is_valid_date(day_1.text) or not _is_valid_date(day_2.text)
-	if _is_valid_date(day_1.text):
-		day_mapping[day_1.text] = "Day 1"
-
-
-func _on_day_2_text_changed(new_text: String) -> void:
-	submit.disabled = not _is_valid_date(day_1.text) or not _is_valid_date(day_2.text)
-
-	if _is_valid_date(day_2.text):
-		day_mapping[day_2.text] = "Day 2"
 
 func _is_valid_date(date: String) -> bool:
 	var time: int = Time.get_unix_time_from_datetime_string(date)
