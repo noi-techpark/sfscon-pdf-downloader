@@ -15,23 +15,6 @@ const STATUS_KEY: String = "status"
 const SPEAKER_KEY: String = "speakers"
 const PDF_LINK_KEY: String = "pdf presentation"
 
-var keys_index: Dictionary = {
-	ID_KEY: -1,
-	DATE_KEY: -1,
-	TIME_KEY: -1,
-	TITLE_KEY: -1,
-	ROOM_KEY: -1,
-	TRACK_KEY: -1,
-	STATUS_KEY: -1,
-	SPEAKER_KEY: -1,
-	PDF_LINK_KEY: -1,
-}
-
-# TODO make day mapping input field
-const DAY_MAPPING: Dictionary = { 
-	"10/11/2024" : "Day 1",
-	"11/11/2024" : "Day 2",
-}
 
 @onready var file_dialog: FileDialog = $WebsiteFileDialog
 
@@ -47,9 +30,30 @@ const DAY_MAPPING: Dictionary = {
 @onready var settings: VBoxContainer = $Settings
 @onready var example: Label = $Settings/Example
 
-@onready var time_checkbox: CheckBox = $Settings/HBoxContainer/TimeCheckbox
-@onready var title_checkbox: CheckBox = $Settings/HBoxContainer/TitleCheckBox
-@onready var regex_checkbox: CheckBox = $Settings/HBoxContainer/RegexCheckbox
+@onready var time_checkbox: CheckBox = $Settings/PdfConfig/TimeCheckbox
+@onready var title_checkbox: CheckBox = $Settings/PdfConfig/TitleCheckBox
+@onready var regex_checkbox: CheckBox = $Settings/PdfConfig/RegexCheckbox
+
+@onready var day_1: LineEdit = $Settings/DayConfig1/Day1
+@onready var day_2: LineEdit = $Settings/DayConfig2/Day2
+
+@onready var submit: Button = $Settings/Submit
+
+var keys_index: Dictionary = {
+	ID_KEY: -1,
+	DATE_KEY: -1,
+	TIME_KEY: -1,
+	TITLE_KEY: -1,
+	ROOM_KEY: -1,
+	TRACK_KEY: -1,
+	STATUS_KEY: -1,
+	SPEAKER_KEY: -1,
+	PDF_LINK_KEY: -1,
+}
+
+#"10/11/2024" : "Day 1"
+#"11/11/2024" : "Day 2"
+var day_mapping: Dictionary  = {} 
 
 var pdf_path: String
 
@@ -72,6 +76,14 @@ func _ready() -> void:
 
 	_load_config()
 	
+	# restore day mapping
+	for day: String in day_mapping.keys():
+		if day_mapping[day] == "Day 1":
+			day_1.text = day
+		elif day_mapping[day] == "Day 2":
+			day_2.text = day
+	submit.disabled = not _is_valid_date(day_1.text) or not _is_valid_date(day_2.text)
+	
 	time_checkbox.button_pressed = include_time
 	title_checkbox.button_pressed = include_title
 	regex_checkbox.button_pressed = include_special_characters
@@ -89,6 +101,7 @@ func _load_config() -> void:
 	include_title = config.get_value("settings", "include_title", true)
 	include_time = config.get_value("settings", "include_time", true)
 	include_special_characters = config.get_value("settings", "include_special_characters", true)
+	day_mapping = config.get_value("settings", "day_mapping" , {})
 
 
 func _save_config(path: String) -> void:
@@ -97,6 +110,7 @@ func _save_config(path: String) -> void:
 	config.set_value("settings", "include_title", include_title)
 	config.set_value("settings", "include_time", include_time)
 	config.set_value("settings", "include_special_characters", include_special_characters)
+	config.set_value("settings", "day_mapping", day_mapping)
 	config.save("user://settings.cfg")
 
 
@@ -204,8 +218,8 @@ func _prepare_dir(base_path: String, path: String) -> String:
 	return base_path + path
 
 func _get_day(day: String) -> String:
-	if DAY_MAPPING.has(day):
-		return DAY_MAPPING[day]
+	if day_mapping.has(day):
+		return day_mapping[day]
 	return "TBD"
 	
 func _escape_string(string: String) -> String:
@@ -253,7 +267,8 @@ func _update_example() -> void:
 	var speaker: String = "Märio Rössi"
 	
 	example.text = _format_file_name(time, title, speaker)
-	
+
+
 func _format_file_name(time: String, title: String, speaker: String) -> String:
 	if not include_time:
 		time = ""
@@ -278,3 +293,20 @@ func _format_file_name(time: String, title: String, speaker: String) -> String:
 	text = text.strip_edges()
 	
 	return text
+
+
+func _on_day_1_text_changed(new_text: String) -> void:
+	submit.disabled = not _is_valid_date(day_1.text) or not _is_valid_date(day_2.text)
+	if _is_valid_date(day_1.text):
+		day_mapping[day_1.text] = "Day 1"
+
+
+func _on_day_2_text_changed(new_text: String) -> void:
+	submit.disabled = not _is_valid_date(day_1.text) or not _is_valid_date(day_2.text)
+
+	if _is_valid_date(day_2.text):
+		day_mapping[day_2.text] = "Day 2"
+
+func _is_valid_date(date: String) -> bool:
+	var time: int = Time.get_unix_time_from_datetime_string(date)
+	return time > 0

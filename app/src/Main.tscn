@@ -37,27 +37,57 @@ modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Settings"]
+[node name="DayConfig1" type="HBoxContainer" parent="Settings"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Description" type="Label" parent="Settings/DayConfig1"]
+layout_mode = 2
+text = "Day 1"
+horizontal_alignment = 1
+
+[node name="Day1" type="LineEdit" parent="Settings/DayConfig1"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+placeholder_text = "2024-11-04"
+
+[node name="DayConfig2" type="HBoxContainer" parent="Settings"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Description" type="Label" parent="Settings/DayConfig2"]
+layout_mode = 2
+text = "Day 2"
+horizontal_alignment = 1
+
+[node name="Day2" type="LineEdit" parent="Settings/DayConfig2"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+placeholder_text = "2024-11-05"
+
+[node name="PdfConfig" type="HBoxContainer" parent="Settings"]
 layout_mode = 2
 theme_override_constants/separation = 5
 alignment = 1
 
-[node name="Description" type="Label" parent="Settings/HBoxContainer"]
+[node name="Description" type="Label" parent="Settings/PdfConfig"]
 layout_mode = 2
 text = "Pdf file format:"
 horizontal_alignment = 1
 
-[node name="TimeCheckbox" type="CheckBox" parent="Settings/HBoxContainer"]
+[node name="TimeCheckbox" type="CheckBox" parent="Settings/PdfConfig"]
 layout_mode = 2
 button_pressed = true
 text = "Time"
 
-[node name="TitleCheckBox" type="CheckBox" parent="Settings/HBoxContainer"]
+[node name="TitleCheckBox" type="CheckBox" parent="Settings/PdfConfig"]
 layout_mode = 2
 button_pressed = true
 text = "Title"
 
-[node name="RegexCheckbox" type="CheckBox" parent="Settings/HBoxContainer"]
+[node name="RegexCheckbox" type="CheckBox" parent="Settings/PdfConfig"]
 layout_mode = 2
 button_pressed = true
 text = "Special characters"
@@ -70,6 +100,7 @@ horizontal_alignment = 1
 [node name="Submit" type="Button" parent="Settings"]
 layout_mode = 2
 size_flags_horizontal = 4
+disabled = true
 text = " Open csv "
 
 [node name="WebsiteFileDialog" type="FileDialog" parent="."]
@@ -150,9 +181,11 @@ metadata/_edit_use_anchors_ = true
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
 use_threads = true
 
-[connection signal="toggled" from="Settings/HBoxContainer/TimeCheckbox" to="." method="_on_time_checkbox_toggled"]
-[connection signal="toggled" from="Settings/HBoxContainer/TitleCheckBox" to="." method="_on_title_check_box_toggled"]
-[connection signal="toggled" from="Settings/HBoxContainer/RegexCheckbox" to="." method="_on_regex_checkbox_toggled"]
+[connection signal="text_changed" from="Settings/DayConfig1/Day1" to="." method="_on_day_1_text_changed"]
+[connection signal="text_changed" from="Settings/DayConfig2/Day2" to="." method="_on_day_2_text_changed"]
+[connection signal="toggled" from="Settings/PdfConfig/TimeCheckbox" to="." method="_on_time_checkbox_toggled"]
+[connection signal="toggled" from="Settings/PdfConfig/TitleCheckBox" to="." method="_on_title_check_box_toggled"]
+[connection signal="toggled" from="Settings/PdfConfig/RegexCheckbox" to="." method="_on_regex_checkbox_toggled"]
 [connection signal="pressed" from="Settings/Submit" to="." method="_on_submit_pressed"]
 [connection signal="file_selected" from="WebsiteFileDialog" to="." method="_on_website_file_dialog_file_selected"]
 [connection signal="pressed" from="Result/Restart" to="." method="_on_restart_pressed"]
