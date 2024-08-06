@@ -109,7 +109,7 @@ func _process(delta: float) -> void:
 	progress_bar.value = counter_done
 
 
-func _on_submit_pressed():
+func _on_submit_pressed() -> void:
 	settings.hide()
 	file_dialog.show()
 
@@ -139,39 +139,61 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 				var title: String = line[keys_index[TITLE_KEY]]
 				
 				var date: String = line[keys_index[DATE_KEY]]
+				# hotfix for wrong date format 10:3010/11/2023
+				if date.length() > 10:
+					date = date.substr(5)
+				
 				counter_total += 1
-				if not data.has(id):
-					errors.append_text(str(errors.get_line_count()) + ") " + title + "\n")
-				elif pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
+
+				if pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
+					data[id] = {}
 					data[id]["pdf_link"] = pdf_link
-					data[id]["speaker"] = _escape_string(keys_index[SPEAKER_KEY])
+					data[id]["speaker"] = _escape_string(line[keys_index[SPEAKER_KEY]])
 					data[id]["time"] = line[keys_index[TIME_KEY]].substr(0,5).replace(":", "")
 					data[id]["date"] = date
+					data[id]["title"] = title
+					data[id]["track"] = line[keys_index[TRACK_KEY]]
+					data[id]["room"] = line[keys_index[ROOM_KEY]]
 					counter_pdf += 1
+				else:
+					errors.append_text(str(errors.get_line_count()) + ") " + title + "\n")
 			else:
 				data.erase(id)
 				print("not approved ", line[keys_index[TITLE_KEY]])
 	
 	# TREMENDOUS HACK, don't try this at home, these stunts are performed by trained professionals
 	# convert date into day 1, day 2, day 3...
-	for talk: Dictionary in data:
+	var dates_unix: Array[int] = []
+	for talk_id: String in data.keys():
+		var talk: Dictionary = data[talk_id]
 		var date: String = talk["date"]
-		var date_parts: Array[String] = date.split("/")
+		var date_parts: PackedStringArray = date.split("/")
 		# day format 31/12/24
 		var day: int = int(date_parts[0])
 		var month: int = int(date_parts[1])
 		var year: int = int(date_parts[2])
-		year += 2000 # SFSCON still in year 3000 using this tool? COOL!
 		
 		# convert to ISO 8601 format 2024-12-31
-		var iso_date: String = "%d-%d-%d"%[year, month, date]
-		var date_dict: Dictionary = Time.get_datetime_dict_from_datetime_string(iso_date, false)
+		var iso_date: String = "%d-%d-%d"%[year, month, day]
 		var date_unix: int = Time.get_unix_time_from_datetime_string(iso_date)
 		
-		if not day_mapping.has(date):
-			day_mapping[date] = ""
+		if not dates_unix.has(date_unix):
+			dates_unix.append(date_unix)
 	
-	
+	# sort dates_unix to assign day_mapping with Day 1, Day 2...
+	dates_unix.sort()
+	var day_counter: int = 1
+	for date_unix: int in dates_unix:
+		var date_dict: Dictionary = Time.get_date_dict_from_unix_time(date_unix)
+		var date_str: String = "%d/%d/%d"%[date_dict.day, date_dict.month, date_dict.year]
+		day_mapping[date_str] = "Day " + str(day_counter)
+		day_counter += 1
+
+	# assign day
+	for talk_id: String in data.keys():
+		var talk: Dictionary = data[talk_id]
+		var date: String = talk["date"]
+		talk["day"] = day_mapping[date]
 	
 	progress_bar.max_value = counter_pdf
 	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
@@ -216,7 +238,8 @@ func _request_completed(result, response_code, headers, body: PackedByteArray, t
 	if not FileAccess.file_exists(file_path):
 		errors2.append_text(str(errors2.get_line_count()) + ") " + file_path + "\n")
 	counter_done += 1
-	
+
+
 func _prepare_dir(base_path: String, path: String) -> String:
 	var dir = DirAccess.open(base_path)
 	if not dir.dir_exists(base_path + path):
@@ -224,11 +247,13 @@ func _prepare_dir(base_path: String, path: String) -> String:
 	dir.change_dir(base_path + path)
 	return base_path + path
 
+
 func _get_day(day: String) -> String:
 	if day_mapping.has(day):
 		return day_mapping[day]
 	return "TBD"
-	
+
+
 func _escape_string(string: String) -> String:
 	var results: Array[RegExMatch] = regex.search_all(string)
 	var escaped = "";
@@ -240,8 +265,9 @@ func _escape_string(string: String) -> String:
 	return escaped
 
 
-func _on_restart_pressed():
+func _on_restart_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/Main.tscn")
+
 
 func _is_approved(line: Array) -> bool:
 	var date: String = line[keys_index[DATE_KEY]]
@@ -253,17 +279,17 @@ func _is_approved(line: Array) -> bool:
 	return true
 
 
-func _on_time_checkbox_toggled(button_pressed):
+func _on_time_checkbox_toggled(button_pressed) -> void:
 	include_time = button_pressed
 	_update_example()
 
 
-func _on_title_check_box_toggled(button_pressed):
+func _on_title_check_box_toggled(button_pressed) -> void:
 	include_title = button_pressed
 	_update_example()
 
 
-func _on_regex_checkbox_toggled(button_pressed):
+func _on_regex_checkbox_toggled(button_pressed) -> void:
 	include_special_characters = button_pressed
 	_update_example()
 
