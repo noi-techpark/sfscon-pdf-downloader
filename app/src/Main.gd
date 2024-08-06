@@ -110,11 +110,11 @@ func _process(delta: float) -> void:
 
 
 func _on_submit_pressed() -> void:
-	settings.hide()
 	file_dialog.show()
 
 
 func _on_website_file_dialog_file_selected(path: String) -> void:
+	settings.hide()
 	_save_config(path.get_base_dir())
 	
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
