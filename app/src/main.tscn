@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dpmylgddcilwg"]
 
-[ext_resource type="Script" path="res://src/Main.gd" id="1_3qsph"]
+[ext_resource type="Script" path="res://src/main.gd" id="1_3qsph"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -29,7 +29,7 @@ theme_override_constants/separation = 5
 
 [node name="Welcome" type="Label" parent="Settings"]
 layout_mode = 2
-text = "WELCOME TO THE SFSCON PDF TOOL!"
+text = "SFSCON PDF Downloader"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="Settings"]

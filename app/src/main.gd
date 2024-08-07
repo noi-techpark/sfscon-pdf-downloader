@@ -66,6 +66,7 @@ var include_title: bool
 var include_time: bool
 var include_special_characters: bool
 
+
 func _ready() -> void:
 	regex.compile("\\w+")
 
@@ -79,6 +80,16 @@ func _ready() -> void:
 		file_dialog.current_path = pdf_path
 	
 	_update_example()
+
+
+func _process(delta: float) -> void:
+	if counter_done < counter_pdf:
+		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_pdf]
+	elif counter_pdf == 0:
+		progress_label.text = "No PDF generated, probably somehting went wrong.\nPlease restart."
+	else:
+		progress_label.text = "Finished! Happy SFSCON :-)"
+	progress_bar.value = counter_done
 
 
 func _load_config() -> void:
@@ -99,16 +110,6 @@ func _save_config(path: String) -> void:
 	config.save("user://settings.cfg")
 
 
-func _process(delta: float) -> void:
-	if counter_done < counter_pdf:
-		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_pdf]
-	elif counter_pdf == 0:
-		progress_label.text = "No PDF generated, probably somehting went wrong.\nPlease restart."
-	else:
-		progress_label.text = "Finished! Happy SFSCON :-)"
-	progress_bar.value = counter_done
-
-
 func _on_submit_pressed() -> void:
 	file_dialog.show()
 
@@ -117,6 +118,15 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 	settings.hide()
 	_save_config(path.get_base_dir())
 	
+	_read_csv(path)
+	_assign_day_mapping()
+	
+	_download_pdfs()
+	
+	result.show()
+
+
+func _read_csv(path: String) -> void:
 	var file:FileAccess = FileAccess.open(path, FileAccess.READ)
 	
 	# search for key index values on header row
@@ -137,14 +147,10 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 			if _is_approved(line):
 				var pdf_link: String = line[keys_index[PDF_LINK_KEY]]
 				var title: String = line[keys_index[TITLE_KEY]]
-				
 				var date: String = line[keys_index[DATE_KEY]]
-				# hotfix for wrong date format 10:3010/11/2023
-				if date.length() > 10:
-					date = date.substr(5)
 				
 				counter_total += 1
-
+				
 				if pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 					data[id] = {}
 					data[id]["pdf_link"] = pdf_link
@@ -159,8 +165,9 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 					errors.append_text(str(errors.get_line_count()) + ") " + title + "\n")
 			else:
 				data.erase(id)
-				print("not approved ", line[keys_index[TITLE_KEY]])
-	
+
+
+func _assign_day_mapping() -> void:
 	# TREMENDOUS HACK, don't try this at home, these stunts are performed by trained professionals
 	# convert date into day 1, day 2, day 3...
 	var dates_unix: Array[int] = []
@@ -194,15 +201,12 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 		var talk: Dictionary = data[talk_id]
 		var date: String = talk["date"]
 		talk["day"] = day_mapping[date]
-	
-	progress_bar.max_value = counter_pdf
-	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
-	_download_pdfs()
-	
-	result.show()
 
 
 func _download_pdfs() -> void:
+	progress_bar.max_value = counter_pdf
+	statistics_label.text = "Total: %d  -  Pdf: %d  -  No Pdf: %d"%[counter_total, counter_pdf, counter_total - counter_pdf]
+	
 	for id in data.keys():
 		if data[id].has("pdf_link") and data[id]["pdf_link"].begins_with("https://www.sfscon.it/wp-content/uploads/"):
 			if http.request_completed.is_connected(_request_completed):
@@ -331,3 +335,7 @@ func _format_file_name(time: String, title: String, speaker: String) -> String:
 func _is_valid_date(date: String) -> bool:
 	var time: int = Time.get_unix_time_from_datetime_string(date)
 	return time > 0
+
+
+func _on_close_pressed():
+	get_tree().quit()
