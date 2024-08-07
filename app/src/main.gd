@@ -22,7 +22,7 @@ const PDF_LINK_KEY: String = "pdf presentation"
 @onready var statistics_label: Label = $Result/Statistics
 @onready var progress_bar: ProgressBar = $Result/ProgressBar
 @onready var http: HTTPRequest = $HTTPRequest
-@onready var result: VBoxContainer = $Result
+@onready var result_container: VBoxContainer = $Result
 
 @onready var errors: RichTextLabel = $Result/Errors
 @onready var errors2: RichTextLabel = $Result/Errors2
@@ -66,8 +66,9 @@ var include_title: bool
 var include_time: bool
 var include_special_characters: bool
 
-
+# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# only allow alphanumeric values, no special characters
 	regex.compile("\\w+")
 
 	_load_config()
@@ -76,13 +77,15 @@ func _ready() -> void:
 	title_checkbox.button_pressed = include_title
 	regex_checkbox.button_pressed = include_special_characters
 	
+	# load saved pdf path, if exists
 	if not pdf_path.is_empty():
 		file_dialog.current_path = pdf_path
 	
 	_update_example()
 
 
-func _process(delta: float) -> void:
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(_delta: float) -> void:
 	if counter_done < counter_pdf:
 		progress_label.text = "Downloading %d of %d..."%[counter_done, counter_pdf]
 	elif counter_pdf == 0:
@@ -110,10 +113,6 @@ func _save_config(path: String) -> void:
 	config.save("user://settings.cfg")
 
 
-func _on_submit_pressed() -> void:
-	file_dialog.show()
-
-
 func _on_website_file_dialog_file_selected(path: String) -> void:
 	settings.hide()
 	_save_config(path.get_base_dir())
@@ -123,7 +122,7 @@ func _on_website_file_dialog_file_selected(path: String) -> void:
 	
 	_download_pdfs()
 	
-	result.show()
+	result_container.show()
 
 
 func _read_csv(path: String) -> void:
@@ -220,7 +219,8 @@ func _download_pdfs() -> void:
 			errors.append_text(str(errors.get_line_count()) + ") " + data[id]["title"] + "\n")
 
 
-func _request_completed(result, response_code, headers, body: PackedByteArray, talk: Dictionary) -> void:
+# callback when http request for PDF downlaod is finished
+func _request_completed(_result, _response_code, _headers, body: PackedByteArray, talk: Dictionary) -> void:
 	if talk["track"].length() == 0:
 		print("Talk with no room assigned: \n" + talk["title"])
 		counter_done += 1
@@ -269,10 +269,6 @@ func _escape_string(string: String) -> String:
 	return escaped
 
 
-func _on_restart_pressed() -> void:
-	get_tree().change_scene_to_file("res://src/Main.tscn")
-
-
 func _is_approved(line: Array) -> bool:
 	var date: String = line[keys_index[DATE_KEY]]
 	var time: String = line[keys_index[TIME_KEY]]
@@ -281,21 +277,6 @@ func _is_approved(line: Array) -> bool:
 	if time == "✗":
 		return false
 	return true
-
-
-func _on_time_checkbox_toggled(button_pressed) -> void:
-	include_time = button_pressed
-	_update_example()
-
-
-func _on_title_check_box_toggled(button_pressed) -> void:
-	include_title = button_pressed
-	_update_example()
-
-
-func _on_regex_checkbox_toggled(button_pressed) -> void:
-	include_special_characters = button_pressed
-	_update_example()
 
 
 func _update_example() -> void:
@@ -337,5 +318,28 @@ func _is_valid_date(date: String) -> bool:
 	return time > 0
 
 
-func _on_close_pressed():
-	get_tree().quit()
+##########################
+# buttons/checkboxes events
+##########################
+
+func _on_time_checkbox_toggled(button_pressed) -> void:
+	include_time = button_pressed
+	_update_example()
+
+
+func _on_title_check_box_toggled(button_pressed) -> void:
+	include_title = button_pressed
+	_update_example()
+
+
+func _on_regex_checkbox_toggled(button_pressed) -> void:
+	include_special_characters = button_pressed
+	_update_example()
+
+
+func _on_submit_pressed() -> void:
+	file_dialog.show()
+
+
+func _on_restart_pressed() -> void:
+	get_tree().change_scene_to_file("res://src/main.tscn")
