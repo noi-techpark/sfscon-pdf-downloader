@@ -25,7 +25,7 @@ const PDF_LINK_KEY: String = "pdf presentation"
 @onready var result_container: VBoxContainer = $Result
 
 @onready var errors: RichTextLabel = $Result/Errors
-@onready var errors2: RichTextLabel = $Result/Errors2
+@onready var log: RichTextLabel = $Result/Log
 
 @onready var settings: VBoxContainer = $Settings
 @onready var example: Label = $Settings/Example
@@ -33,6 +33,7 @@ const PDF_LINK_KEY: String = "pdf presentation"
 @onready var time_checkbox: CheckBox = $Settings/PdfConfig/TimeCheckbox
 @onready var title_checkbox: CheckBox = $Settings/PdfConfig/TitleCheckBox
 @onready var regex_checkbox: CheckBox = $Settings/PdfConfig/RegexCheckbox
+@onready var windows_warning = $Settings/WindowsWarning
 
 @onready var submit: Button = $Settings/Submit
 
@@ -101,7 +102,9 @@ func _load_config() -> void:
 	pdf_path = config.get_value("settings", "pdf_path", "")
 	include_title = config.get_value("settings", "include_title", true)
 	include_time = config.get_value("settings", "include_time", true)
-	include_special_characters = config.get_value("settings", "include_special_characters", true)
+	include_special_characters = config.get_value("settings", "include_special_characters", false)
+
+	windows_warning.visible = OS.get_name() == "Windows" and include_special_characters
 
 
 func _save_config(path: String) -> void:
@@ -235,12 +238,15 @@ func _request_completed(_result, _response_code, _headers, body: PackedByteArray
 	# remove new lines, double points and tabs
 	file_path = file_path.replace("..",".")
 	print(file_path)
+	
+	log.append_text(str(counter_done + 1) + ") Saving: " + file_path + "\n")
+	
 	var file:FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
 	file.store_buffer(body)
 	file.flush()
 	
 	if not FileAccess.file_exists(file_path):
-		errors2.append_text(str(errors2.get_line_count()) + ") " + file_path + "\n")
+		log.append_text(str(counter_done + 1) + ") " + file_path + "\n")
 	counter_done += 1
 
 
@@ -335,6 +341,7 @@ func _on_title_check_box_toggled(button_pressed) -> void:
 func _on_regex_checkbox_toggled(button_pressed) -> void:
 	include_special_characters = button_pressed
 	_update_example()
+	windows_warning.visible = OS.get_name() == "Windows" and include_special_characters
 
 
 func _on_submit_pressed() -> void:

@@ -19,10 +19,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -59.0
-offset_top = -18.5
-offset_right = 59.0
-offset_bottom = 18.5
+offset_left = -400.0
+offset_top = -204.0
+offset_right = 400.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 5
@@ -66,6 +66,24 @@ text = "Special characters"
 layout_mode = 2
 text = "1030 - Märio Rössi - Talk about $$$.pdf"
 horizontal_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="Settings"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="WindowsWarning" type="Label" parent="Settings"]
+layout_mode = 2
+text = "WARNING! Using special characters on Windows
+might cause crashes during download."
+horizontal_alignment = 1
+
+[node name="HSeparator3" type="HSeparator" parent="Settings"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Submit" type="Button" parent="Settings"]
 layout_mode = 2
@@ -130,12 +148,12 @@ size_flags_vertical = 3
 focus_mode = 2
 selection_enabled = true
 
-[node name="ErrorsLabel2" type="Label" parent="Result"]
+[node name="LogLabel" type="Label" parent="Result"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-text = "PROBLEMS SAVING PDF"
+text = "LOG"
 
-[node name="Errors2" type="RichTextLabel" parent="Result"]
+[node name="Log" type="RichTextLabel" parent="Result"]
 layout_mode = 2
 size_flags_vertical = 3
 focus_mode = 2
