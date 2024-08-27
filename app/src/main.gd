@@ -32,8 +32,6 @@ const PDF_LINK_KEY: String = "pdf presentation"
 
 @onready var time_checkbox: CheckBox = $Settings/PdfConfig/TimeCheckbox
 @onready var title_checkbox: CheckBox = $Settings/PdfConfig/TitleCheckBox
-@onready var regex_checkbox: CheckBox = $Settings/PdfConfig/RegexCheckbox
-@onready var windows_warning = $Settings/WindowsWarning
 
 @onready var submit: Button = $Settings/Submit
 
@@ -63,7 +61,6 @@ var config: ConfigFile
 
 var include_title: bool
 var include_time: bool
-var include_special_characters: bool
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -71,7 +68,6 @@ func _ready() -> void:
 	
 	time_checkbox.button_pressed = include_time
 	title_checkbox.button_pressed = include_title
-	regex_checkbox.button_pressed = include_special_characters
 	
 	# load saved pdf path, if exists
 	if not pdf_path.is_empty():
@@ -97,9 +93,6 @@ func _load_config() -> void:
 	pdf_path = config.get_value("settings", "pdf_path", "")
 	include_title = config.get_value("settings", "include_title", true)
 	include_time = config.get_value("settings", "include_time", true)
-	include_special_characters = config.get_value("settings", "include_special_characters", false)
-
-	windows_warning.visible = OS.get_name() == "Windows" and include_special_characters
 
 
 func _save_config(path: String) -> void:
@@ -107,7 +100,6 @@ func _save_config(path: String) -> void:
 	config.set_value("settings", "pdf_path", pdf_path)
 	config.set_value("settings", "include_title", include_title)
 	config.set_value("settings", "include_time", include_time)
-	config.set_value("settings", "include_special_characters", include_special_characters)
 	config.save("user://settings.cfg")
 
 
@@ -281,10 +273,10 @@ func _format_file_name(time: String, title: String, speaker: String) -> String:
 		time = ""
 	if not include_title:
 		title = ""
-		
-	if not include_special_characters:
+	else:
 		title = title.validate_filename()
-		speaker = speaker.validate_filename()
+	
+	speaker = speaker.validate_filename()
 	
 	var text: String = ""
 	if include_time:
@@ -319,12 +311,6 @@ func _on_time_checkbox_toggled(button_pressed) -> void:
 func _on_title_check_box_toggled(button_pressed) -> void:
 	include_title = button_pressed
 	_update_example()
-
-
-func _on_regex_checkbox_toggled(button_pressed) -> void:
-	include_special_characters = button_pressed
-	_update_example()
-	windows_warning.visible = OS.get_name() == "Windows" and include_special_characters
 
 
 func _on_submit_pressed() -> void:
