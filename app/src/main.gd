@@ -61,17 +61,12 @@ var counter_total: int = 0
 
 var config: ConfigFile
 
-var regex: RegEx = RegEx.new()
-
 var include_title: bool
 var include_time: bool
 var include_special_characters: bool
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# only allow alphanumeric values, no special characters
-	regex.compile("\\w+")
-
 	_load_config()
 	
 	time_checkbox.button_pressed = include_time
@@ -156,7 +151,7 @@ func _read_csv(path: String) -> void:
 				if pdf_link.begins_with("https://www.sfscon.it/wp-content/uploads/"):
 					data[id] = {}
 					data[id]["pdf_link"] = pdf_link
-					data[id]["speaker"] = _escape_string(line[keys_index[SPEAKER_KEY]])
+					data[id]["speaker"] = str(line[keys_index[SPEAKER_KEY]]).validate_filename()
 					data[id]["time"] = line[keys_index[TIME_KEY]].substr(0,5).replace(":", "")
 					data[id]["date"] = date
 					data[id]["title"] = title
@@ -237,7 +232,6 @@ func _request_completed(_result, _response_code, _headers, body: PackedByteArray
 	var file_path: String = "%s/%s"%[base_path, file_name]
 	# remove new lines, double points and tabs
 	file_path = file_path.replace("..",".")
-	print(file_path)
 	
 	log.append_text(str(counter_done + 1) + ") Saving: " + file_path + "\n")
 	
@@ -262,17 +256,6 @@ func _get_day(day: String) -> String:
 	if day_mapping.has(day):
 		return day_mapping[day]
 	return "TBD"
-
-
-func _escape_string(string: String) -> String:
-	var results: Array[RegExMatch] = regex.search_all(string)
-	var escaped = "";
-	
-	# remove non alphanumerical characters
-	if results:
-		for result in results:
-			escaped += " " + result.get_string()
-	return escaped
 
 
 func _is_approved(line: Array) -> bool:
@@ -300,8 +283,8 @@ func _format_file_name(time: String, title: String, speaker: String) -> String:
 		title = ""
 		
 	if not include_special_characters:
-		title = _escape_string(title)
-		speaker = _escape_string(speaker)
+		title = title.validate_filename()
+		speaker = speaker.validate_filename()
 	
 	var text: String = ""
 	if include_time:
