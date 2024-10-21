@@ -158,19 +158,12 @@ func _read_csv(path: String) -> void:
 
 func _assign_day_mapping() -> void:
 	# TREMENDOUS HACK, don't try this at home, these stunts are performed by trained professionals
-	# convert date into day 1, day 2, day 3...
+	# convert dates into day 1, day 2, day 3...
 	var dates_unix: Array[int] = []
 	for talk_id: String in data.keys():
 		var talk: Dictionary = data[talk_id]
 		var date: String = talk["date"]
-		var date_parts: PackedStringArray = date.split("/")
-		# day format 31/12/24
-		var day: int = int(date_parts[0])
-		var month: int = int(date_parts[1])
-		var year: int = int(date_parts[2])
-		
-		# convert to ISO 8601 format 2024-12-31
-		var iso_date: String = "%d-%d-%d"%[year, month, day]
+		var iso_date: String = _convert_to_iso_date(date)
 		var date_unix: int = Time.get_unix_time_from_datetime_string(iso_date)
 		
 		if not dates_unix.has(date_unix):
@@ -180,8 +173,7 @@ func _assign_day_mapping() -> void:
 	dates_unix.sort()
 	var day_counter: int = 1
 	for date_unix: int in dates_unix:
-		var date_dict: Dictionary = Time.get_date_dict_from_unix_time(date_unix)
-		var date_str: String = "%d/%d/%d"%[date_dict.day, date_dict.month, date_dict.year]
+		var date_str: String = Time.get_date_string_from_unix_time(date_unix)
 		day_mapping[date_str] = "Day " + str(day_counter)
 		day_counter += 1
 
@@ -189,7 +181,21 @@ func _assign_day_mapping() -> void:
 	for talk_id: String in data.keys():
 		var talk: Dictionary = data[talk_id]
 		var date: String = talk["date"]
-		talk["day"] = day_mapping[date]
+		var iso_date: String = _convert_to_iso_date(date)
+		talk["day"] = day_mapping[iso_date]
+
+
+# convert format in csv file 31/12/24 to ISO 8601 format 2024-12-31
+func _convert_to_iso_date(date: String) -> String:
+	var date_parts: PackedStringArray = date.split("/")
+	var date_dict: Dictionary = {
+		"day": int(date_parts[0]),
+		"month": int(date_parts[1]),
+		"year": int(date_parts[2]),
+	}
+	var unix_time: int = Time.get_unix_time_from_datetime_dict(date_dict)
+	var iso_date: String = Time.get_date_string_from_unix_time(unix_time)
+	return iso_date
 
 
 func _download_pdfs() -> void:
