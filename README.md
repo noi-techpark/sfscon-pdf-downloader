@@ -16,7 +16,8 @@ An real example would be
 
 Note: The title is not used in the file name intentionally, because it causes a lot of problems with special characters etc.
 
-Created with the Godot Engine 4.3
+Created with the Godot Engine 4.3  
+Get it here https://github.com/godotengine/godot-builds/releases/tag/4.3-stable
 
 ## Table of content
 - [SFSCON Pdf Downloader](#sfscon-pdf-downloader)
