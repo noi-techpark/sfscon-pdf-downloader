@@ -33,3 +33,6 @@ app/android/build/.gradle/
 # screenshots
 screenshots/
 
+# ignore all csv files
+csv/
+*.csv

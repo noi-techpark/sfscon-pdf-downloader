@@ -16,7 +16,7 @@ An real example would be
 
 Note: The title is not used in the file name intentionally, because it causes a lot of problems with special characters etc.
 
-Created with the Godot Engine 4.3
+Created with the Godot Engine 4.5.1  
 
 ## Table of content
 - [SFSCON Pdf Downloader](#sfscon-pdf-downloader)
@@ -37,8 +37,10 @@ After the first time, the path is saved, so on next opening, the file dialog alr
 You can read eventual errors or talks without Pdf in the error log. 
 
 ## Prerequisites
-To develop and build the application, you need the Godot 4.2.2 executable you can download from https://godotengine.org/download.  
-If a new version is available, Godot upgrades the project automatically to the latest version. But some functionality might break.
+To develop and build the application, you need the Godot executable.  
+Get it here https://github.com/godotengine/godot-builds/releases/tag/4.5.1-stable  
+If a new version is available, Godot upgrades the project automatically to the latest version.
+But some functionality might break.
 
 ## Getting started
 Open the Godot Engine executable and open the [app/project.godot](app/project.godot) file to open the project.

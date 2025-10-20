@@ -25,7 +25,7 @@ const PDF_LINK_KEY: String = "pdf presentation"
 @onready var result_container: VBoxContainer = $Result
 
 @onready var errors: RichTextLabel = $Result/Errors
-@onready var log: RichTextLabel = $Result/Log
+@onready var event_log: RichTextLabel = $Result/Log
 
 @onready var settings: VBoxContainer = $Settings
 @onready var example: Label = $Settings/Example
@@ -129,9 +129,20 @@ func _read_csv(path: String) -> void:
 	for key: String in keys_index.keys():
 		keys_index[key] = headers.find(key.to_lower())
 	
+	var line_number: int = 0
 	while not file.eof_reached():
 		var line: Array = file.get_csv_line()
 		if line.size() > 1:
+			# check if line is big enough
+			# append next line
+			while line.size() < headers.size():
+				# stop if end of file
+				if file.eof_reached():
+					break
+				line.append(file.get_csv_line())
+
+			print("line number %d" % line_number)
+			line_number += 1
 			var id: String = line[keys_index[ID_KEY]]
 			if _is_approved(line):
 				var pdf_link: String = line[keys_index[PDF_LINK_KEY]]
@@ -148,7 +159,7 @@ func _read_csv(path: String) -> void:
 					data[id]["date"] = date
 					data[id]["title"] = title
 					data[id]["track"] = line[keys_index[TRACK_KEY]]
-					data[id]["room"] = line[keys_index[ROOM_KEY]]
+					data[id]["room"] = _clean_room(line[keys_index[ROOM_KEY]])
 					counter_pdf += 1
 				else:
 					errors.append_text(str(errors.get_line_count()) + ") " + title + "\n")
@@ -183,6 +194,23 @@ func _assign_day_mapping() -> void:
 		var date: String = talk["date"]
 		var iso_date: String = _convert_to_iso_date(date)
 		talk["day"] = day_mapping[iso_date]
+
+
+# removes all html tags
+func _clean_room(room: String) -> String:
+	if room.is_empty():
+		return room
+
+	# check if string contains <> <> tags
+	if room.count("<") < 2 or room.count(">") < 2:
+		return room
+
+	var splitted_room: PackedStringArray = room.split(">")
+	if splitted_room.size() < 2:
+		return room
+	splitted_room = splitted_room[1].split("<")
+
+	return splitted_room[0]
 
 
 # convert format in csv file 31/12/24 to ISO 8601 format 2024-12-31
@@ -231,14 +259,18 @@ func _request_completed(_result, _response_code, _headers, body: PackedByteArray
 	# remove new lines, double points and tabs
 	file_path = file_path.replace("..",".")
 	
-	log.append_text(str(counter_done + 1) + ") Saving: " + file_path + "\n")
+	event_log.append_text(str(counter_done + 1) + ") Saving: " + file_path + "\n")
 	
-	var file:FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		event_log.append_text(str(counter_done + 1) + ") ERROR while saving" + file_path + "\n")
+		return
+
 	file.store_buffer(body)
 	file.flush()
 	
 	if not FileAccess.file_exists(file_path):
-		log.append_text(str(counter_done + 1) + ") " + file_path + "\n")
+		event_log.append_text(str(counter_done + 1) + ") " + file_path + "\n")
 	counter_done += 1
 
 
